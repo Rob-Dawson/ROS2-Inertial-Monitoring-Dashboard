@@ -4,7 +4,7 @@ from bisect import bisect_left
 from mcap_ros2.reader import read_ros2_messages
 
 
-MCAP_FILE = "Turtlebot Inertial Monitoring/Carpet/Flat/Crashes/rosbag2_2026_05_05-14_11_05/rosbag2_2026_05_05-14_11_05_0.mcap"
+MCAP_FILE = "Recorded Data/Turtlebot Inertial Monitoring/Home/Carpet (Study)/Crashes/rosbag2_2026_05_21-12_39_13/rosbag2_2026_05_21-12_39_13_0.mcap"
 OUTPUT_FILE = "Inertial_monitoring_motion.csv"
 
 def get_header_time(ros_msg):
@@ -72,6 +72,19 @@ def extract_imu_MBF(imu):
         "gyro_z": imu.angular_velocity.z,
     }
 
+def extract_accel_without_grav_body(vector):
+    return {
+        "accel_x": vector.vector.x,
+        "accel_y": vector.vector.y,
+        "accel_z": vector.vector.z,
+    }
+
+def extract_accel_without_grav_world(vector):
+    return {
+        "accel_x": vector.vector.x,
+        "accel_y": vector.vector.y,
+        "accel_z": vector.vector.z,
+    }
 
 def extract_joint_states(joint):
     row = {}
@@ -133,7 +146,7 @@ extract_topic_to_csv(MCAP_FILE, "/zupt/twist", "zupt.csv", extract_zupt_message)
 ### Manual Input Crashes ###
 # type: std_msgs/msg/String
 extract_topic_to_csv(
-    MCAP_FILE, "/crash_stamped", "crash_stamps.csv", extract_crash_logs
+    MCAP_FILE, "/crash_event", "crash_stamps.csv", extract_crash_logs
 )
 ### Manual Input Crashes ###
 
@@ -141,3 +154,13 @@ extract_topic_to_csv(
 # type: geometry_msgs/msg/TwistStamped
 extract_topic_to_csv(MCAP_FILE, "/cmd_vel", "desired_velocity.csv", extract_cmd_vel)
 ### Desired Velocity ###
+
+### Acceleration Without Gravity Body Frame ###
+# type: geometry_msgs/msg/Vector3Stamped
+extract_topic_to_csv(MCAP_FILE, "/imu/accel_gravity_removed_body", "accel_gravity_removed_body.csv", extract_accel_without_grav_body)
+### Acceleration Without Gravity Body Frame ###
+
+### Acceleration Without Gravity World Frame ###
+# type: geometry_msgs/msg/Vector3Stamped
+extract_topic_to_csv(MCAP_FILE, "/imu/accel_gravity_removed_world", "accel_gravity_removed_world.csv", extract_accel_without_grav_world)
+### Acceleration Without Gravity World Frame ###
