@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.express as px
 import dashboard
-
 import processing
+
 st.set_page_config(layout="wide")
 data = dashboard.load_and_process_data()
 
@@ -78,7 +78,7 @@ def plot_signals(df, cols, title, plot_id, df_crash=None, start=None, end=None):
         x="t",
         y=available_cols,
         title=title,
-        color_discrete_map=AXIS_COLOURS        
+        color_discrete_map=AXIS_COLOURS,
     )
 
     if df_crash is not None and start is not None and end is not None:
@@ -120,17 +120,3 @@ plot_signals(
     start=start,
     end=end,
 )
-
-# window_df = df[(df["t"] >= start) & (df["t"] <= end)]
-# cols = [
-#     "accel_dyn_x",
-#     "accel_dyn_y",
-#     "accel_dyn_z",
-#     "accel_dyn_mag",
-# ]
-# plot_signals(
-#     window_df,
-#     cols,
-#     title=signal_group,
-#     ID ="gravity_removed_raw_imu",
-# )

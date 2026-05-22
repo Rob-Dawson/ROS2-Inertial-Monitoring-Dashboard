@@ -14,6 +14,8 @@ df_imu = data["df_imu"]
 df_joint = data["df_joint_states"]
 df_zupt =  data["df_zupt"]
 df_crash =  data["df_crash"]
+df_accel_without_gravity_body =  data["df_accel_without_gravity_body"]
+df_accel_without_gravity_world =  data["df_accel_without_gravity_world"]
 
 
 def add_imu_features(df):
@@ -98,20 +100,36 @@ signals = {
     "Raw accel X": (df_imu_raw, "accel_x"),
     "Raw accel Y": (df_imu_raw, "accel_y"),
     "Raw accel Z": (df_imu_raw, "accel_z"),
-    # "Raw accel magnitude": (df_imu_raw, "accel_mag"),
 
     "Raw gyro X": (df_imu_raw, "gyro_x"),
     "Raw gyro Y": (df_imu_raw, "gyro_y"),
     "Raw gyro Z": (df_imu_raw, "gyro_z"),
 
-    # "Accel Without Gravity X": (df_imu_raw, "accel_dyn_x"),
-    # "Accel Without Gravity Y": (df_imu_raw, "accel_dyn_y"),
-    # "Accel Without Gravity Z": (df_imu_raw, "accel_dyn_z"),
-    # "Accel Magnitude": (df_imu_raw, "accel_dyn_mag"),
+    "Filtered accel X": (df_imu, "accel_x"),
+    "Filtered accel Y": (df_imu, "accel_y"),
+    "Filtered accel Z": (df_imu, "accel_z"),
+
+    "Filtered gyro X": (df_imu, "gyro_x"),
+    "Filtered gyro Y": (df_imu, "gyro_y"),
+    "Filtered gyro Z": (df_imu, "gyro_z"),
+
+    "Desired Linear Velocity": (df_cmd, "desired_linear_vel_x"),
+    "Desired Angular Velocity": (df_cmd, "desired_angular_vel_z"),
+
+    "Actual Linear Velocity": (df_joint, "wheel_left_joint_velocity"),
+    "Actual Angular Velocity": (df_joint, "wheel_right_joint_velocity"),
+
+    "Acceleration Without Gravity Body X": (df_accel_without_gravity_body, "accel_x"),
+    "Acceleration Without Gravity Body Y": (df_accel_without_gravity_body, "accel_y"),
+    "Acceleration Without Gravity Body Z": (df_accel_without_gravity_body, "accel_z"),
+    
+    
+    
+    "Acceleration Without Gravity World X": (df_accel_without_gravity_world, "accel_x"),
+    "Acceleration Without Gravity World Y": (df_accel_without_gravity_world, "accel_y"),
+    "Acceleration Without Gravity World Z": (df_accel_without_gravity_world, "accel_z"),
 
 
-    # "Filtered accel magnitude": (df_imu, "accel_mag"),
-    # "Filtered gyro magnitude": (df_imu, "gyro_mag"),
 }
 
 # Add all joint velocity columns automatically

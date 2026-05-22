@@ -6,11 +6,18 @@ st.set_page_config(layout="wide")
 data = dashboard.load_and_process_data()
 
 df = data["df_joint_states"]
+df_crash = data["df_crash"]
+
 AXIS_COLOURS = {
     "wheel_left_joint_velocity": "red",
     "wheel_right_joint_velocity": "green",
-
 }
+
+SIGNAL_GROUPS = {
+    "Actual Speed": ["wheel_left_joint_velocity", "wheel_right_joint_velocity"],
+}
+def window(df, start, end):
+    return df[(df["t"] >= start) & (df["t"] <= end)]
 
 def time_window_controls(max_time):
     col1, col2 = st.columns(2)
@@ -32,16 +39,37 @@ def time_window_controls(max_time):
             step=0.1,
         )
         return st.slider("Time window", 0.0, 450.0, (start_input, end_input), step=0.1)
-    
 
-def plot_signals(df, cols, title):
+
+def add_crash_regions(fig, df_crash):
+    crash_before = df_crash[df_crash["event"] == "crash_before"]["t"].to_list()
+    crash_after = df_crash[df_crash["event"] == "crash_after"]["t"].to_list()
+
+    for start, end in zip(crash_before, crash_after):
+        fig.add_vrect(
+            x0=start,
+            x1=end,
+            fillcolor="red",
+            opacity=0.2,
+            line_width=0,
+            annotation_text="crash",
+            annotation_position="top left",
+        )
+    return fig
+
+def plot_signals(df, cols, title, plot_id, df_crash=None, start=None, end=None):
+    available_cols = [col for col in cols if col in df.columns]
+
     fig = px.line(
         df,
         x="t",
-        y=cols,
+        y=available_cols,
         title=title,
         color_discrete_map=AXIS_COLOURS,
     )
+
+    if df_crash is not None and start is not None and end is not None:
+        fig = add_crash_regions(fig, df_crash)
 
     fig.update_layout(
         height=900,
@@ -52,15 +80,22 @@ def plot_signals(df, cols, title):
         fig,
         use_container_width=True,
         config={"scrollZoom": True},
+        key=plot_id,
+
     )    
     
 st.title("Actual Velocity")
 max_time = float(df["t"].max())
 start, end = time_window_controls(max_time)
 
-window_df = df[(df["t"] >= start) & (df["t"] <= end)]
+window_df = window(df, start, end)
 
+signal_group = st.selectbox(
+    "Signal Group",
+    list(SIGNAL_GROUPS.keys()),
+)
 
+cols = SIGNAL_GROUPS[signal_group]
 
 st.dataframe(df[["wheel_left_joint_velocity",
                  "wheel_right_joint_velocity", 
@@ -68,6 +103,10 @@ st.dataframe(df[["wheel_left_joint_velocity",
                  "t"]])
 plot_signals(
     window_df,
-    cols=["wheel_left_joint_velocity", "wheel_right_joint_velocity"],
-    title="Velocity",
+    cols,
+    title=signal_group,
+    plot_id="actual_speed",
+    df_crash=df_crash,
+    start=start,
+    end=end,
 )
