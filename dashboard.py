@@ -7,13 +7,23 @@ import plotly.express as px
 import processing
 import streamlit_antd_components as sac
 
-IMU_RAW_CSV = "./CSV_Experiment_Data/imu_raw.csv"
-IMU_DATA_MBF_CSV = "./CSV_Experiment_Data/imu_data_MBF.csv"
-IMU_DATA_CSV = "./CSV_Experiment_Data/imu_data_MBF_LPF_Madgwick.csv"
-JOINT_STATES_CSV = "./CSV_Experiment_Data/joint_states.csv"
-CMD_VEL_CSV = "./CSV_Experiment_Data/desired_velocity.csv"
-CRASH_STAMPS_CSV = "./CSV_Experiment_Data/crash_stamps.csv"
-ZUPT_CSV = "./CSV_Experiment_Data/zupt.csv"
+# IMU_RAW_CSV = "./CSV_Experiment_Data/imu_raw.csv"
+# IMU_DATA_MBF_CSV = "./CSV_Experiment_Data/imu_data_MBF.csv"
+# IMU_DATA_CSV = "./CSV_Experiment_Data/imu_data_MBF_LPF_Madgwick.csv"
+# JOINT_STATES_CSV = "./CSV_Experiment_Data/joint_states.csv"
+# CMD_VEL_CSV = "./CSV_Experiment_Data/desired_velocity.csv"
+# CRASH_STAMPS_CSV = "./CSV_Experiment_Data/crash_stamps.csv"
+# ZUPT_CSV = "./CSV_Experiment_Data/zupt.csv"
+
+IMU_RAW_CSV = "imu_raw.csv"
+IMU_DATA_MBF_CSV = "imu_data_MBF.csv"
+IMU_DATA_CSV = "imu_data_MBF_LPF_Madgwick.csv"
+JOINT_STATES_CSV = "joint_states.csv"
+CMD_VEL_CSV = "desired_velocity.csv"
+CRASH_STAMPS_CSV = "crash_stamps.csv"
+ZUPT_CSV = "zupt.csv"
+ACCEL_WITHOUT_GRAVITY_BODY = "accel_gravity_removed_body.csv"
+ACCEL_WITHOUT_GRAVITY_WORLD = "accel_gravity_removed_world.csv"
 
 @st.cache_data
 def load_csv(path):
@@ -30,6 +40,8 @@ def load_and_process_data():
     df_cmd_vel = load_csv(CMD_VEL_CSV)
     df_crash = load_csv(CRASH_STAMPS_CSV)
     df_zupt = load_csv(ZUPT_CSV)
+    df_accel_without_gravity_body = load_csv(ACCEL_WITHOUT_GRAVITY_BODY)
+    df_accel_without_gravity_world = load_csv(ACCEL_WITHOUT_GRAVITY_WORLD)
 
 
     experiment_start = df_imu_raw["timestamp"].iloc[0]
@@ -46,6 +58,10 @@ def load_and_process_data():
     
     df_zupt = processing.add_relative_time(df_zupt, experiment_start)
 
+    df_accel_without_gravity_body = processing.add_relative_time(df_accel_without_gravity_body, experiment_start)
+    df_accel_without_gravity_world = processing.add_relative_time(df_accel_without_gravity_world, experiment_start)
+
+
     imu_raw_windows = processing.SlidingWindow(1.0, 0.5)
     df_raw_imu_features = imu_raw_windows.calculate(df_imu_raw)
 
@@ -55,19 +71,32 @@ def load_and_process_data():
     imu_data_windows = processing.SlidingWindow(1.0, 0.5)
     df_imu_data_features = imu_data_windows.calculate(df_imu)
 
+    accel_without_gravity_body_windows = processing.SlidingWindow(1.0, 0.5)
+    df_accel_without_gravity_body_features = accel_without_gravity_body_windows.calculate(df_accel_without_gravity_body)
+
+    accel_without_gravity_world_windows = processing.SlidingWindow(1.0, 0.5)
+    df_accel_without_gravity_world_features = accel_without_gravity_world_windows.calculate(df_accel_without_gravity_world)
+
+
     return {
         "df_imu_raw": df_imu_raw,
         "df_imu_mbf": df_imu_mbf,
         "df_imu": df_imu,
+        "df_accel_without_gravity_body": df_accel_without_gravity_body,
+        "df_accel_without_gravity_world": df_accel_without_gravity_world,
+        
         "df_joint_states": df_joint_states,
         "df_cmd_vel": df_cmd_vel,
+        
         "df_crash": df_crash,
         "df_zupt": df_zupt,
+
         
         "df_raw_imu_features": df_raw_imu_features,
         "df_raw_imu_mbf_features": df_raw_imu_mbf_features,
         "df_imu_data_features": df_imu_data_features,
-
+        "df_accel_without_gravity_world_features": df_accel_without_gravity_world_features,
+        "df_accel_without_gravity_body_features": df_accel_without_gravity_body_features,
     }
 
 
